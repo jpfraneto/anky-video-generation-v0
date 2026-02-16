@@ -1,0 +1,22 @@
+# Generated assets (too large for git)
+*.png
+*.mp4
+*.mp3
+*.wav
+
+# Runtime directories
+scenes/
+generated_videos/
+logs/
+test_run/
+
+# Transcripts (large files)
+youtube_data/
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# OS
+.DS_Store
