@@ -182,14 +182,13 @@ def grok_poll(request_id: str, max_wait=600, interval=8) -> str:
             r.raise_for_status()
             d = r.json()
             elapsed = int(time.time() - t0)
+            # Grok API: when done, response has "video.url" directly (no "status" field)
+            # When pending, response has "status": "pending"
+            video_url = d.get("video", {}).get("url") if isinstance(d.get("video"), dict) else None
+            if video_url:
+                log.info("    [%ds] done", elapsed)
+                return video_url
             status = d.get("status", "unknown")
-            if status == "done":
-                video_url = d.get("video", {}).get("url")
-                if video_url:
-                    log.info("    [%ds] done", elapsed)
-                    return video_url
-                log.error("    [%ds] done but no video URL: %s", elapsed, d)
-                return None
             if status in ("expired", "failed"):
                 log.error("    [%ds] %s", elapsed, status)
                 return None

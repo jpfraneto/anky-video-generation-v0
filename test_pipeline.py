@@ -100,11 +100,15 @@ def grok_poll(request_id, max_wait=600, interval=8):
         r.raise_for_status()
         d = r.json()
         elapsed = int(time.time() - start)
-        print(f"    [{elapsed}s] {d['status']}")
-        if d["status"] == "done":
-            return d["video"]["url"]
-        if d["status"] == "expired":
-            print(f"    EXPIRED: {d}")
+        # Grok API: when done, response has "video.url" directly (no "status" field)
+        video_url = d.get("video", {}).get("url") if isinstance(d.get("video"), dict) else None
+        if video_url:
+            print(f"    [{elapsed}s] done")
+            return video_url
+        status = d.get("status", "unknown")
+        print(f"    [{elapsed}s] {status}")
+        if status in ("expired", "failed"):
+            print(f"    FAILED: {d}")
             return None
         time.sleep(interval)
     print(f"    TIMEOUT after {max_wait}s")
